@@ -1,0 +1,82 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background-color: #282c34;
+}
+
+.App-header {
+  padding: 20px;
+  color: white;
+}
+
+h1 {
+  margin-bottom: 30px;
+}
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+input[type="file"] {
+  padding: 10px;
+  background: white;
+  border-radius: 5px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #61dafb;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #282c34;
+  font-weight: bold;
+}
+
+button:hover:not(:disabled) {
+  background-color: #4fa8c5;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.image-container {
+  margin: 20px auto;
+  max-width: 90%;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto;
+  border: 2px solid #61dafb;
+  border-radius: 5px;
+}
+
+.results {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.results ul {
+  list-style: none;
+  padding: 0;
+}
+
+.results li {
+  padding: 10px;
+  margin: 5px 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}

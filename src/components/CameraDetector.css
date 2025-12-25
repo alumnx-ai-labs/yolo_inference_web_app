@@ -1,0 +1,49 @@
+.camera-detector {
+  padding: 20px;
+}
+
+.camera-controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.start-btn {
+  background-color: #4CAF50;
+}
+
+.start-btn:hover {
+  background-color: #45a049;
+}
+
+.stop-btn {
+  background-color: #f44336;
+}
+
+.stop-btn:hover {
+  background-color: #da190b;
+}
+
+.fps-counter {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  font-weight: bold;
+  color: #61dafb;
+}
+
+.video-container {
+  margin: 20px auto;
+  max-width: 90%;
+  position: relative;
+}
+
+.video-container canvas {
+  max-width: 100%;
+  height: auto;
+  border: 3px solid #61dafb;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}

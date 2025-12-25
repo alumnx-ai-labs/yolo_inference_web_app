@@ -1,0 +1,7 @@
+{
+  "num_classes": 2,
+  "class_names": ["mangoTree", "notMangoTree"],
+  "input_size": 640,
+  "confidence_threshold": 0.25,
+  "iou_threshold": 0.45
+}
