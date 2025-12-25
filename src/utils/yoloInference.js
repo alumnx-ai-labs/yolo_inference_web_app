@@ -19,7 +19,13 @@ export async function loadModel() {
 
 function preprocessImage(image, inputSize) {
   console.log("🖼️ Preprocessing image...");
-  console.log("   Input dimensions:", image.width, "x", image.height);
+
+  // Handle VIDEO elements differently
+  const actualWidth = image.videoWidth || image.width;
+  const actualHeight = image.videoHeight || image.height;
+
+  console.log("   Input dimensions:", actualWidth, "x", actualHeight);
+  console.log("   Element type:", image.tagName);
   console.log("   Target size:", inputSize);
 
   const canvas = document.createElement("canvas");
@@ -46,16 +52,11 @@ function preprocessImage(image, inputSize) {
 
   console.log("✅ Preprocessed tensor shape:", tensor.dims);
   console.log("   Tensor data length:", tensor.data.length);
-  console.log("   Sample values:", tensor.data.slice(0, 10));
 
   return tensor;
 }
 
 function nms(boxes, scores, iouThreshold) {
-  console.log("🔍 Running NMS...");
-  console.log("   Input boxes:", boxes.length);
-  console.log("   IoU threshold:", iouThreshold);
-
   const indices = scores
     .map((score, idx) => ({ score, idx }))
     .sort((a, b) => b.score - a.score)
@@ -78,7 +79,6 @@ function nms(boxes, scores, iouThreshold) {
     }
   }
 
-  console.log("✅ NMS kept:", keep.length, "boxes");
   return keep;
 }
 
@@ -97,11 +97,6 @@ function iou(box1, box2) {
 }
 
 function postProcess(output, config, originalWidth, originalHeight) {
-  console.log("📦 Post-processing output...");
-  console.log("   Output shape:", output.dims);
-  console.log("   Output data length:", output.data.length);
-  console.log("   Output type:", output.type);
-
   const {
     num_classes,
     class_names,
@@ -110,34 +105,12 @@ function postProcess(output, config, originalWidth, originalHeight) {
     input_size,
   } = config;
 
-  console.log("⚙️ Config:", {
-    num_classes,
-    class_names,
-    confidence_threshold,
-    iou_threshold,
-    input_size,
-  });
-
   const outputData = output.data;
-
-  // YOLOv8 output format is [1, 4+num_classes, 8400]
-  // We need to transpose it to [8400, 4+num_classes]
-  const numBoxes = output.dims[2]; // 8400
-  const numFields = output.dims[1]; // 4 + num_classes
-
-  console.log("   Number of boxes:", numBoxes);
-  console.log(
-    "   Fields per box:",
-    numFields,
-    "(4 coords + " + num_classes + " classes)"
-  );
+  const numBoxes = output.dims[2];
 
   const detections = [];
-  let maxConfidence = 0;
-  let totalAboveThreshold = 0;
 
   for (let i = 0; i < numBoxes; i++) {
-    // Get class scores for this box
     const scores = [];
     for (let j = 0; j < num_classes; j++) {
       const score = outputData[i + (4 + j) * numBoxes];
@@ -147,11 +120,7 @@ function postProcess(output, config, originalWidth, originalHeight) {
     const maxScore = Math.max(...scores);
     const classId = scores.indexOf(maxScore);
 
-    if (maxScore > maxConfidence) maxConfidence = maxScore;
-
     if (maxScore > confidence_threshold) {
-      totalAboveThreshold++;
-
       // YOLOv8 format: x_center, y_center, width, height
       const x_center = outputData[i];
       const y_center = outputData[i + numBoxes];
@@ -176,17 +145,7 @@ function postProcess(output, config, originalWidth, originalHeight) {
     }
   }
 
-  console.log("📊 Detection stats:");
-  console.log("   Max confidence found:", maxConfidence);
-  console.log("   Boxes above threshold:", totalAboveThreshold);
-  console.log("   Detections before NMS:", detections.length);
-
-  if (detections.length > 0) {
-    console.log("   Sample detection:", detections[0]);
-  }
-
   if (detections.length === 0) {
-    console.warn("⚠️ No detections found! Try lowering confidence_threshold");
     return [];
   }
 
@@ -195,38 +154,37 @@ function postProcess(output, config, originalWidth, originalHeight) {
   const keepIndices = nms(boxes, scores, iou_threshold);
 
   const finalDetections = keepIndices.map((idx) => detections[idx]);
-  console.log("✅ Final detections after NMS:", finalDetections.length);
+  console.log("✅ Final detections:", finalDetections.length);
 
   return finalDetections;
 }
 
 export async function detectObjects(imageElement) {
-  console.log("🚀 Starting detection...");
-  console.log("   Image element:", imageElement.tagName);
-  console.log("   Image size:", imageElement.width, "x", imageElement.height);
-
   const { session, config } = await loadModel();
+
+  // Get actual dimensions (handle VIDEO vs IMG elements)
+  const actualWidth = imageElement.videoWidth || imageElement.width;
+  const actualHeight = imageElement.videoHeight || imageElement.height;
+
+  console.log(
+    "🎯 Detecting on:",
+    imageElement.tagName,
+    actualWidth,
+    "x",
+    actualHeight
+  );
 
   const inputTensor = preprocessImage(imageElement, config.input_size);
 
-  console.log("🔮 Running inference...");
   const feeds = { images: inputTensor };
   const startTime = performance.now();
   const results = await session.run(feeds);
   const inferenceTime = performance.now() - startTime;
 
-  console.log("✅ Inference completed in", inferenceTime.toFixed(2), "ms");
-  console.log("   Output keys:", Object.keys(results));
+  console.log("⏱️ Inference:", inferenceTime.toFixed(0), "ms");
 
   const output = results[session.outputNames[0]];
+  const detections = postProcess(output, config, actualWidth, actualHeight);
 
-  const detections = postProcess(
-    output,
-    config,
-    imageElement.width,
-    imageElement.height
-  );
-
-  console.log("🎯 Returning", detections.length, "detections");
   return detections;
 }
