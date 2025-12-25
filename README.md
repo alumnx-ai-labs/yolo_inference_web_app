@@ -1,70 +1,90 @@
-# Getting Started with Create React App
+# 🥭 Mango Tree Detector
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based web application that uses a YOLOv8 model to detect mango trees in real-time. This application runs object detection entirely in the browser using [ONNX Runtime Web](https://onnxruntime.ai/docs/tutorials/web/).
 
-## Available Scripts
+## ✨ Features
 
-In the project directory, you can run:
+- **Real-time Camera Detection**: Uses the device camera to identify mango trees in real-time streams.
+- **Image Upload Support**: Analyze existing photos by uploading them directly to the app.
+- **Client-Side Inference**: All processing happens locally in your browser using WebAssembly and WebGL - no data is sent to a server.
+- **Custom YOLO Model**: specifically trained for detecting mango trees vs. non-mango tree objects.
 
-### `npm start`
+## 🛠️ Technology Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Frontend**: React.js
+- **ML Engine**: `onnxruntime-web` for running ONNX models in the browser.
+- **Model**: YOLOv8 (converted to ONNX format).
+- **Styling**: Vanilla CSS.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🚀 Getting Started
 
-### `npm test`
+### Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Node.js installed on your machine.
+- A modern web browser with WebGL support (Chrome/Edge/Firefox recommended).
 
-### `npm run build`
+### Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. Ensure Model Files are Present:
+   - Make sure you have your trained `model.onnx` and `model_config.json` files placed in the `public/models/` directory.
+   - The config file should look like this:
+     ```json
+     {
+       "num_classes": 2,
+       "class_names": ["mangoTree", "notMangoTree"],
+       "confidence_threshold": 0.5,
+       "iou_threshold": 0.45,
+       "input_size": 640
+     }
+     ```
 
-### `npm run eject`
+4. Start the development server:
+   ```bash
+   npm start
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+5. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 📁 Project Structure
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```
+yolo-detector/
+├── public/
+│   └── models/          # Store .onnx model and config.json here
+├── src/
+│   ├── components/
+│   │   ├── CameraDetector.js  # Real-time webcam detection logic
+│   │   ├── ImageDetector.js   # Static image upload detection logic
+│   │   └── ...
+│   ├── utils/
+│   │   └── yoloInference.js   # Core logic for ONNX model loading & inference
+│   ├── App.js           # Main application shell
+│   └── ...
+└── package.json
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🧠 How it Works
 
-## Learn More
+1. **Model Loading**: The app fetches the `model.onnx` and `config.json` files from the `public` directory using `ort.InferenceSession.create`.
+2. **Preprocessing**: Images (from camera frame or file input) are resized to the target input size (e.g., 640x640) and normalized.
+3. **Inference**: The ONNX runtime executes the model on the input tensor.
+4. **Post-processing**: The output tensors are parsed to extract bounding boxes and class scores. Non-Maximum Suppression (NMS) is applied to remove overlapping duplicates.
+5. **Rendering**: Bounding boxes and labels are drawn onto the canvas overlaying the image/video.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🤝 Contributing
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-### Code Splitting
+## 📄 License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is licensed under the MIT License.
